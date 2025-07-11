@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CSV Q&A with LLM</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #111827;
+    }
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      resize: vertical;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    .result {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+    .result strong {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>University Data Chatbot</h1>
+
+  <form id="qaForm">
+    <textarea id="question" rows="4" placeholder="Ask a question about the colleges..."></textarea>
+    <button type="submit">Get Answer</button>
+  </form>
+
+  <div id="response" class="result" style="display: none;"></div>
+
+  <script>
+    const form = document.getElementById('qaForm');
+    const responseBox = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = document.getElementById('question').value.trim();
+
+      if (!question) {
+        alert("Please enter a question!");
+        return;
+      }
+
+      responseBox.style.display = 'block';
+      responseBox.textContent = "Thinking... 🤔";
+
+      try {
+        const res = await fetch('/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await res.json();
+
+        if (data.answer) {
+          responseBox.innerHTML = marked.parse(data.answer);  // Render Markdown as HTML
+        } else if (data.error) {
+          responseBox.textContent = "⚠️ Error: " + data.error;
+        } else {
+          responseBox.textContent = "⚠️ Unknown error occurred.";
+        }
+      } catch (error) {
+        responseBox.textContent = "⚠️ Error communicating with server.";
+        console.error("Fetch error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
