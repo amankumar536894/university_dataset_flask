@@ -1,0 +1,5 @@
+flask
+pandas
+langchain
+langchain-huggingface
+python-dotenv
